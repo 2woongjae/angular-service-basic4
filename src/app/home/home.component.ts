@@ -1,6 +1,7 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { LogService } from '../log.service';
 import { FactoryService } from '../factory.service';
+import { Http } from '@angular/http';
 
 @Component({
   selector: 'app-home',
@@ -10,7 +11,7 @@ import { FactoryService } from '../factory.service';
     LogService,
     {
       provide: 'githubUrl',
-      useValue: 'https://github.com'
+      useValue: 'https://api.github.com/users'
     },
     {
       provide: 'log',
@@ -27,16 +28,27 @@ import { FactoryService } from '../factory.service';
 })
 export class HomeComponent implements OnInit {
 
+  data = [];
+
   constructor(
     @Inject('githubUrl') private githubUrl,
     @Inject('log') private logService,
-    @Inject('factory') private factoryService
+    @Inject('factory') private factoryService,
+    private http: Http
   ) { }
 
   ngOnInit() {
-    console.log(this.githubUrl);
-    this.logService.info('안녕하세요');
+    this.logService.info(this.githubUrl);
     this.factoryService.log();
+    this.http.get(this.githubUrl)
+    .toPromise()
+    .then(data => {
+      this.data = data.json();
+    })
+    .catch(err => {
+      console.log(err);
+      this.data = [];
+    });
   }
 
 }
